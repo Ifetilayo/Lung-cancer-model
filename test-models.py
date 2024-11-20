@@ -10,7 +10,6 @@ models = [
     "k-NN",
     "Gradient Boosting",
     "Decision Tree",
-    "Naive Bayes"
 ]
 
 model_metrics = {}

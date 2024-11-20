@@ -2,12 +2,12 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-file_path = 'Data/final_dataset_97.csv'
+file_path = 'Data/cancer patient data sets.csv'
 data = pd.read_csv(file_path)
-# mapping = {'High': 2, 'Medium': 1, 'Low': 0}
-# data["Level"].replace(mapping, inplace=True)
+mapping = {'High': 2, 'Medium': 1, 'Low': 0}
+data["Level"].replace(mapping, inplace=True)
 
-data['Level'] = data['Level'].map(lambda x: 1 if x == 'High' else 0)
+# data['Level'] = data['Level'].map(lambda x: 1 if x == 'High' else 0)
 
 data_summary = {
     "data_info": data.info(),
@@ -18,9 +18,17 @@ data_summary
 
 data_cleaned = data.drop(columns=["index", "Patient Id"])
 
-# # # Encode the target variable 'Level'
+
+
+# # Encode the target variable 'Level'
 # label_encoder = LabelEncoder()
 # data_cleaned['Level'] = label_encoder.fit_transform(data_cleaned['Level'])
+
+df_corr = data_cleaned.corr()
+df_corr
+
+plt.title("Correlation Matrix")
+sns.heatmap(df_corr, cmap='viridis')
 
 data_cleaned_summary = {
     "data_cleaned_head": data_cleaned.head(),
@@ -83,7 +91,16 @@ def get_rf_visual(model, model_name):
     plt.close()
 
 def get_decision_tree_visual(model):
-   tree.export_graphviz(model, 
+   # Feature importances
+    importances = model.feature_importances_
+    # print(importances)
+
+    # Map importances to feature names
+    feature_names = X_train.columns
+    for name, importance in zip(feature_names, importances):
+        print(f"{name}: {importance}")
+
+    tree.export_graphviz(model, 
                         out_file='visualizations/decision-tree.dot',
                         feature_names=list(X_train.columns),
                         class_names=[str(label) for label in sorted(Y.unique())],
@@ -130,17 +147,15 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import CategoricalNB
 import joblib
 
 models = {
     "Random Forest": RandomForestClassifier(random_state=42),
-    "Logistic Regression": LogisticRegression(max_iter=200, random_state=42),
+    "Logistic Regression": LogisticRegression(max_iter=500, random_state=42),
     "SVC": SVC(random_state=42),
     "k-NN": KNeighborsClassifier(),
     "Gradient Boosting": GradientBoostingClassifier(random_state=42),
     "Decision Tree": DecisionTreeClassifier(),
-    "Naive Bayes": CategoricalNB()
 }
 
 for model_name, model in models.items():
