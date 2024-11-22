@@ -1,9 +1,7 @@
 # In[1]:
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import ConfusionMatrixDisplay
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -16,8 +14,6 @@ import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn import tree
-
-from itertools import combinations
 
 # SMOTE for Imbalance Handling
 from imblearn.over_sampling import SMOTE
