@@ -1,6 +1,7 @@
 # ignore ALL .log files
 *.log
 *.pyc
+*.DS_Store
 
 # ignore ALL files in ANY directory named temp
 __pycache__/
