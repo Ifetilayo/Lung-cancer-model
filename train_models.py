@@ -15,12 +15,16 @@ import joblib
 from sklearn.model_selection import train_test_split
 from sklearn import tree
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+
 # SMOTE for Imbalance Handling
 from imblearn.over_sampling import SMOTE
 
 # In[2]:
-file_path = 'Data/final_dataset_97.csv'
+file_path = 'Data/latest_dataset.csv'
 data = pd.read_csv(file_path)
+data = data.drop_duplicates()
 
 data_cleaned = data.drop(columns=["index", "Patient Id"])
 
@@ -73,6 +77,7 @@ plt.savefig(f'images/heatmap.png', bbox_inches='tight')
 
 
 # In[4]
+
 # Split the data into features (X) and target (y)
 X = data_cleaned.drop(columns=['Level'])
 Y = data_cleaned['Level']
@@ -80,6 +85,12 @@ Y = data_cleaned['Level']
 smote = SMOTE(random_state=42)
 X_resampled, y_resampled = smote.fit_resample(X, Y)
 X_resampled, y_resampled
+
+plt.figure(figsize = (11, 9))
+plt.title("Target distribution after resolving imbalance with smote")
+plt.pie(y_resampled.value_counts(), explode = (0.01, 0.01, 0.01), labels = ['High', 'Medium', 'Low'], autopct = "%1.2f%%")
+plt.legend(title = "Lung Cancer Chances", loc = "lower left")
+plt.savefig(f'images/Imbalance resolved.png', bbox_inches='tight')
 
 for column in X.columns:
     crosstab = pd.crosstab(X[column], Y, normalize='index')
@@ -92,7 +103,11 @@ for column in X.columns:
     plt.close()
 
 # Split the dataset into training and testing sets (80% train, 20% test)
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+X_train, X_test, Y_train, Y_test = train_test_split(X_resampled, y_resampled, test_size=0.3, random_state=42)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
 def get_rf_visual(model, model_name):
     feature_importances = pd.Series(model.feature_importances_, index=X_train.columns)
@@ -172,7 +187,20 @@ for model_name, model in models.items():
     print(f"Cross-validated Accuracy: {grid_search.best_score_}")
 
 for model_name, model in other_models.items():
-    model.fit(X_train, Y_train)
+    model.fit(X_train_scaled, Y_train)
     
-    # Export model to file
     joblib.dump(model, f'models/{model_name}.joblib')
+
+# %%
+
+accuracies = {}
+for model_name, model in other_models.items():
+    loaded_model = joblib.load(f'models/{model_name}.joblib')
+
+    y_pred = model.predict(X_test_scaled)
+
+    accuracies[model_name] = accuracy_score(Y_test, y_pred)
+
+results = pd.DataFrame({"Models": other_models.keys(), "Accuracies": accuracies.values()})
+results
+# %%

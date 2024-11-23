@@ -7,9 +7,6 @@ from sklearn.metrics import classification_report
 
 models = [
     "Random Forest",
-    "Logistic Regression",
-    "SVC",
-    "KNN",
     "Gradient Boosting",
     "Decision Tree",
 ]
@@ -19,9 +16,7 @@ model_metrics = {}
 X_test = pd.read_csv('Data/X_test.csv')
 Y_test = pd.read_csv('Data/Y_test.csv')
 
-accuracies = {
-
-}
+accuracies = {}
 
 for model in models:
     loaded_model = joblib.load(f'models/{model}.joblib')
